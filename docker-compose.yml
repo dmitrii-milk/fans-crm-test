@@ -1,0 +1,31 @@
+name: fans-crm-test
+services:
+  db:
+    container_name: db
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin
+    ports:
+      - 3306:3306
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+    image: mysql
+  server:
+    container_name: server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    tty: true
+    stdin_open: true
+    env_file:
+      - ./server/.env
+    init: true
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 3000:3000
+
+
